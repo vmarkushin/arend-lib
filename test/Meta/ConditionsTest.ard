@@ -1,0 +1,13 @@
+\import Debug.Meta
+\import Logic
+\import Meta
+\import Paths
+\import Paths.Meta
+
+\func f (x : Nat) => 1
+
+\func ifTest (x : Nat) (p : x = 0) : suc x = 1 => run {
+  pmap suc at p,
+  println \Type
+  p
+}

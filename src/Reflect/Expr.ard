@@ -1,0 +1,65 @@
+\import Data.List
+
+\data Fixity | infix | postfix | nonfix | unknown
+
+\data Level
+  | n Nat
+  | inf
+
+\class Sort
+  | h : Level
+  | p : Level
+
+\record String
+  | inner : List Nat
+
+\record Parameter
+  | name : String
+
+\record Referable
+  | name : String
+
+\data LetClausePattern : \Set
+  | lcp (referable : Referable) (type : Expr) (pattern : LetClausePattern)
+
+\data LetClause : \Set
+  | lc (params : List Parameter) (resultType : Expr) (term : Expr) (pattern : LetClausePattern)
+
+\data Option (A : \Type)
+  | Some A
+  | None
+
+\data CaseArg : \Set
+  | ca Expr (Option Referable) (type : (Option Expr))
+
+\data TypedReferable : \Set
+  | tr Referable Expr
+
+\data Pattern : \Set
+  | pat (List TypedReferable)
+
+\data FuncClause : \Set
+  | fc Expr (List Pattern)
+
+\data Expr : \Set
+  | app Expr (List Expr) -- (e t)
+  | typed Expr Expr -- (e : t)
+  | binopseq -- TODO
+  | ref -- TODO
+  | this -- TODO
+  | applyHole -- __
+  | classExt -- TODO
+  | newExpr Expr -- \new e
+  | goal (List Nat) {- string -} Expr -- TODO
+  | hole -- {?}
+  | lam (List Parameter) Expr -- \lam TODO => e
+  | let (List LetClause) Expr -- \let | c0 .. | cn => e
+  | pi (List Expr) Expr -- \Pi ...
+  | sigma (List Expr) -- \Sigma ...
+  | tuple (List Expr) -- (e0, e1, ..., en)
+  | universe -- LevelExpr LevelExpr -- TODO \lp \lh
+  | proj Expr Nat -- e.n
+  | case (List CaseArg) (List FuncClause)
+  | eval Expr
+  | num Nat
+  | str String -- TODO
