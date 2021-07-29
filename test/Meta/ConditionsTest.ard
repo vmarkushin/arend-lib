@@ -7,5 +7,5 @@
 \func f (x : Nat) => 1
 
 \func ifTest : Int => run {
-  unquote 1
+  quote 1
 }

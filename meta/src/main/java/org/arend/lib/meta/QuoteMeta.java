@@ -15,10 +15,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class UnquoteMeta extends BaseMetaDefinition {
+public class QuoteMeta extends BaseMetaDefinition {
     private final StdExtension ext;
 
-    public UnquoteMeta(StdExtension ext) {
+    public QuoteMeta(StdExtension ext) {
         this.ext = ext;
     }
 

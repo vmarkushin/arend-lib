@@ -260,8 +260,9 @@ public class StdExtension implements ArendExtension {
     contributor.declare(category, new LongName("sip"),
       "Proves univalence for categories. The type of objects must extend `BaseSet` and the Hom-set must extend `SetHom` with properties only.",
       Precedence.DEFAULT, sipMeta);
-      contributor.declare(debug, new LongName("unquote"), "",
-              Precedence.DEFAULT, new UnquoteMeta(this));
+      ModulePath reflect = ModulePath.fromString("Reflect.Meta");
+      contributor.declare(reflect, new LongName("quote"), "",
+              Precedence.DEFAULT, new QuoteMeta(this));
   }
 
   @Override
