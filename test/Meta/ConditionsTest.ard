@@ -6,8 +6,6 @@
 
 \func f (x : Nat) => 1
 
-\func ifTest (x : Nat) (p : x = 0) : suc x = 1 => run {
-  pmap suc at p,
-  println \Type
-  p
+\func ifTest : Int => run {
+  unquote 1
 }

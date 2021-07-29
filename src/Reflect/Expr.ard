@@ -50,8 +50,8 @@
   | applyHole -- __
   | classExt -- TODO
   | newExpr Expr -- \new e
-  | goal (List Nat) {- string -} Expr -- TODO
-  | hole -- {?}
+  | goal String Expr -- {?id}
+  | hole -- _
   | lam (List Parameter) Expr -- \lam TODO => e
   | let (List LetClause) Expr -- \let | c0 .. | cn => e
   | pi (List Expr) Expr -- \Pi ...
@@ -61,5 +61,5 @@
   | proj Expr Nat -- e.n
   | case (List CaseArg) (List FuncClause)
   | eval Expr
-  | num Nat
+  | num Int
   | str String -- TODO

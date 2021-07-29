@@ -58,6 +58,8 @@ public class StdExtension implements ArendExtension {
   @Dependency(module = "Logic") public CoreDataDefinition TruncP;
   @Dependency(module = "Logic") public CoreFunctionDefinition propExt;
 
+  @Dependency(module = "Reflect.Expr") public CoreDataDefinition Expr;
+
   public final EquationMeta equationMeta = new EquationMeta(this);
   public final ContradictionMeta contradictionMeta = new ContradictionMeta(this);
   public final ExtMeta extMeta = new ExtMeta(this, false);
@@ -258,6 +260,8 @@ public class StdExtension implements ArendExtension {
     contributor.declare(category, new LongName("sip"),
       "Proves univalence for categories. The type of objects must extend `BaseSet` and the Hom-set must extend `SetHom` with properties only.",
       Precedence.DEFAULT, sipMeta);
+      contributor.declare(debug, new LongName("unquote"), "",
+              Precedence.DEFAULT, new UnquoteMeta(this));
   }
 
   @Override
