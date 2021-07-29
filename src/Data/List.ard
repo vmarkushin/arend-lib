@@ -1,5 +1,6 @@
 \import Algebra.Meta
 \import Algebra.Monoid
+\import Data.Bool
 \import Data.Or
 \import Function.Meta
 \import Logic
@@ -74,6 +75,31 @@
 \func take {A : \Type} (n : Nat) (l : List A) => (splitAt n l).1
 
 \func drop {A : \Type} (n : Nat) (l : List A) => (splitAt n l).2
+
+\func takeWhile {A : \Type} (pr : A -> Bool) (l : List A) : List A \elim l
+  | nil    => nil
+  | :: a l => \case pr a \with {
+    | false => nil
+    | true  => a :: takeWhile pr l
+  }
+
+\func dropWhile {A : \Type} (pr : A -> Bool) (l : List A) : List A \elim l
+  | nil    => nil
+  | :: a l => \case pr a \with {
+    | false => a :: l
+    | true  => dropWhile pr l
+  }
+
+\func filter {A : \Type} (pr : A -> Bool) (l : List A) : List A \elim l
+  | nil    => nil
+  | :: a l => \case pr a \with {
+    | false => filter pr l
+    | true  => a :: filter pr l
+  }
+
+\func foldr {A B : \Type} (f : A -> B -> B) (b : B) (l : List A) : B \elim l
+  | nil    => b
+  | :: a l => f a (foldr f b l)
 
 \func replace {A : \Type} (l : List A) (i s : Nat) (r : List A) =>
   \let! (l1, l2) => splitAt i l
