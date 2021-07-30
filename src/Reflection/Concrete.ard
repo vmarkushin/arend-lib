@@ -25,12 +25,8 @@
 \data LetClause : \Set
   | lc (params : List Parameter) (resultType : Expr) (term : Expr) (pattern : LetClausePattern)
 
-\data Option (A : \Type)
-  | Some A
-  | None
-
 \data CaseArg : \Set
-  | ca Expr (Option Referable) (type : (Option Expr))
+  | ca Expr (Maybe Referable) (type : (Maybe Expr))
 
 \data TypedReferable : \Set
   | tr Referable Expr

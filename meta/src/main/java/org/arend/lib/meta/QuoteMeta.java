@@ -41,7 +41,7 @@ public class QuoteMeta extends BaseMetaDefinition {
         ExpressionTypechecker typechecker;
     }
     
-    class ToArendTermsReflector implements CoreExpressionVisitor<Data, ConcreteExpression> {
+    class ToArendTermsReflector implements CoreExpressionVisitor<Data, ConcreteExpression>{
         @Override
         public ConcreteExpression visitApp(@NotNull CoreAppExpression expr, Data params) {
             return null;
@@ -141,6 +141,16 @@ public class QuoteMeta extends BaseMetaDefinition {
         public ConcreteExpression visitInteger(@NotNull CoreIntegerExpression expr, Data params) {
             var cons = ext.Expr.findConstructor("num");
             return ext.factory.app(ext.factory.ref(cons.getRef()), false, ext.factory.core(expr.computeTyped()));
+        }
+
+        @Override
+        public ConcreteExpression visitTypeCoerce(@NotNull CoreTypeCoerceExpression expr, Data params) {
+            return null;
+        }
+
+        @Override
+        public ConcreteExpression visitArray(@NotNull CoreArrayExpression expr, Data params) {
+            return null;
         }
     }
 

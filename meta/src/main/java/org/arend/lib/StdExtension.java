@@ -58,7 +58,7 @@ public class StdExtension implements ArendExtension {
   @Dependency(module = "Logic") public CoreDataDefinition TruncP;
   @Dependency(module = "Logic") public CoreFunctionDefinition propExt;
 
-  @Dependency(module = "Reflect.Expr") public CoreDataDefinition Expr;
+  @Dependency(module = "Reflection.Concrete") public CoreDataDefinition Expr;
 
   public final EquationMeta equationMeta = new EquationMeta(this);
   public final ContradictionMeta contradictionMeta = new ContradictionMeta(this);
