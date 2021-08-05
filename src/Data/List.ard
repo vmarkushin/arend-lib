@@ -1,5 +1,6 @@
 \import Algebra.Meta
 \import Algebra.Monoid
+\import Data.Bool
 \import Data.Or
 \import Function.Meta
 \import Logic
@@ -73,7 +74,46 @@
 
 \func take {A : \Type} (n : Nat) (l : List A) => (splitAt n l).1
 
+\func takeWhile {A : \Type} (pr : A -> Bool) (l : List A) : List A \elim l
+  | nil    => nil
+  | :: a l => \case pr a \with {
+    | false => nil
+    | true  => a :: takeWhile pr l
+  }
+
 \func drop {A : \Type} (n : Nat) (l : List A) => (splitAt n l).2
+
+\func dropWhile {A : \Type} (pr : A -> Bool) (l : List A) : List A \elim l
+  | nil    => nil
+  | :: a l => \case pr a \with {
+    | false => a :: l
+    | true  => dropWhile pr l
+  }
+
+\func filter {A : \Type} (pr : A -> Bool) (l : List A) : List A \elim l
+  | nil    => nil
+  | :: a l => \case pr a \with {
+    | false => filter pr l
+    | true  => a :: filter pr l
+  }
+  \where
+    \func appendLem {A : \Type} (pr : A -> Bool) (l l' : List A) : filter pr (l ++ l') = filter pr l ++ filter pr l' \elim l
+      | nil    => idp
+      | :: a l =>
+        \let inh => appendLem pr l l'
+        \in \case pr a \as p, idp : pr a = p \with {
+          | false, q => rewrite q inh
+          | true , q => rewrite q $ pmap (a :: __) inh
+        }
+
+\func foldr {A B : \Type} (f : A -> B -> B) (b : B) (l : List A) : B \elim l
+  | nil    => b
+  | :: a l => f a (foldr f b l)
+
+\func foldr_app {A B : \Type} (f : A -> B -> B) (b : B) (l l' : List A)
+  : foldr f b (l ++ l') = foldr f (foldr f b l') l \elim l
+  | nil    => idp
+  | :: a l => pmap (f a __) (foldr_app f b l l')
 
 \func replace {A : \Type} (l : List A) (i s : Nat) (r : List A) =>
   \let! (l1, l2) => splitAt i l
