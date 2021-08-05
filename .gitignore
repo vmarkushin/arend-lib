@@ -3,6 +3,8 @@
 /meta/.gradle/
 bin
 *.iml
+arend-lib.zip
+build.sh
 
 # Created by https://www.gitignore.io/api/vim
 
