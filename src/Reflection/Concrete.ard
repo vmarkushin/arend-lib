@@ -1,6 +1,24 @@
 \import Data.List
+\import Data.Traversable
 
-\data Expr : \Set
+-- да, это конкретный тип, так норм
+-- просто у него в операндах "дырки" типа A
+-- по сути это теперь тип деревьев
+-- Да
+\data Expr (A : \Set) : \Set
   | num (n : Int)
---   | app (e : Expr) (args : List Expr)
---   | lam (e : Expr)
+  | app (e : Expr A) (args : List (Expr A))
+  | lam (e : Expr A)
+
+-- именно так
+\instance ExprTrav : Traversable Expr
+  | sanity-check-fold => {?}
+  | sanity-check-foldr => {?}
+  | sanity-check-foldl => {?}
+  | C => {?}
+  | D => {?}
+  | F => {?}
+  | Func => {?}
+  | Func-id => {?}
+  | Func-o => {?}
+  | traverse => {?}

@@ -1,0 +1,31 @@
+\import Algebra.Monoid
+\import Algebra.Pointed (ide)
+\import Category.Functor
+\import Data.Bool
+\import Data.Foldable
+\import Function
+\import Function.Meta
+\import Meta
+\import Set.Category
+
+\instance Functor'' : Functor SetCat SetCat
+  | F => {?}
+  | Func => {?}
+  | Func-id => {?}
+  | Func-o => {?}
+
+\class Functor'
+  | A : \Set
+
+\class Applicative \extends Functor {
+  | pure : C -> D
+}
+
+\class Traversable \extends Foldable, Functor {
+  | traverse {A B : \Set} {app : Applicative SetCat SetCat} : (A -> app.F B) -> T A -> app.F (T B)
+}
+
+-- надо определить инстанс traversable для арендовских выражений)
+\class Monad (M : \Set -> \Set) \extends Applicative {
+  | join {A : \Set} : M (M A) -> M A
+}
