@@ -76,26 +76,17 @@
 
 \func takeWhile {A : \Type} (pr : A -> Bool) (l : List A) : List A \elim l
   | nil    => nil
-  | :: a l => \case pr a \with {
-    | false => nil
-    | true  => a :: takeWhile pr l
-  }
+  | :: a l => if (pr a) (a :: takeWhile pr l) nil
 
 \func drop {A : \Type} (n : Nat) (l : List A) => (splitAt n l).2
 
 \func dropWhile {A : \Type} (pr : A -> Bool) (l : List A) : List A \elim l
   | nil    => nil
-  | :: a l => \case pr a \with {
-    | false => a :: l
-    | true  => dropWhile pr l
-  }
+  | :: a l => if (pr a) (dropWhile pr l) (a :: l)
 
 \func filter {A : \Type} (pr : A -> Bool) (l : List A) : List A \elim l
   | nil    => nil
-  | :: a l => \case pr a \with {
-    | false => filter pr l
-    | true  => a :: filter pr l
-  }
+  | :: a l => if (pr a) (a :: filter pr l) (filter pr l)
   \where
     \func appendLem {A : \Type} (pr : A -> Bool) (l l' : List A) : filter pr (l ++ l') = filter pr l ++ filter pr l' \elim l
       | nil    => idp

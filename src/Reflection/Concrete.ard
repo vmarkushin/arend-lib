@@ -1,0 +1,6 @@
+\import Data.List
+
+\data Expr : \Set
+  | num (n : Int)
+--   | app (e : Expr) (args : List Expr)
+--   | lam (e : Expr)
