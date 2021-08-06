@@ -3,8 +3,8 @@
 \import Data.Bool
 \import Data.List
 \import Function
-\import Function.Meta
 \import Meta
+\import Paths
 
 \class Foldable (T : \Set -> \Set) {
   | foldMap {M A : \Set} {m : Monoid M} : (A -> M) -> T A -> M
@@ -45,4 +45,8 @@
   | foldr              => Data.List.foldr
   | sanity-check-fold  => unfold Foldable.foldMapImpl idp
   | sanity-check-foldl => unfold Foldable.foldlImpl idp
-  | sanity-check-foldr => unfold Foldable.foldMapImpl $ unfold $ {?}
+  | sanity-check-foldr => unfold Foldable.foldMapImpl (unfold helper)
+  \where
+    \func helper {A B : \Set} {f : A -> B -> B} {b : B} {t : List A} : Data.List.foldr f b t = Data.List.foldr ((o) o f) id t b \elim t
+      | nil    => idp
+      | :: a t => pmap (f a __) helper
