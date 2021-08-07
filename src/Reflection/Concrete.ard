@@ -19,7 +19,7 @@
   | sanity-check-foldl => unfold Foldable.foldMapImpl idp
   | C => {?}
   | D => {?}
-  | F => {?}
+  | T => {?}
   | Func => {?}
   | Func-id => {?}
   | Func-o => {?}

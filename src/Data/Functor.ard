@@ -1,3 +1,5 @@
+\import Function
+
 \class Functor (F : \Type -> \Type)
   | fmap {A B : \Type} (f : A -> B) : F A -> F B
   | fmap-id {A : \Type} (y : F A) : fmap (\lam (x : A) => x) y = y

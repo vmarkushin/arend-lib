@@ -9,15 +9,15 @@
 \class Foldable (T : \Set -> \Set) {
   | foldMap {M A : \Set} {m : Monoid M} : (A -> M) -> T A -> M
   | fold {M : \Set} {m : Monoid M} : T M -> M
-  | foldr {A B : \Set} (f : A -> B -> B) (b : B) (t : T A) : B
-  | foldl {A B : \Set} (f : B -> A -> B) (b : B) (t : T A) : B
+  | foldr {A B : \Set} (f : A -> B -> B) (z : B) (t : T A) : B
+  | foldl {A B : \Set} (f : B -> A -> B) (z : B) (t : T A) : B
 
   | sanity-check-fold {M A : \Set} {m : Monoid M}
     : fold {\this} {M} {m} = foldMap {\this} {M} {M} {m} id
-  | sanity-check-foldr {A B : \Set} {f : A -> B -> B} {b : B} {t : T A}
-    : foldr {\this} {A} {B} f b t = foldMap {\this} {_} {_} {EndoMonoid B} f t b
-  | sanity-check-foldl {A B : \Set} {f : B -> A -> B} {b : B} {t : T A}
-    : foldl {\this} {A} {B} f b t = foldMap {\this} {_} {_} {Monoid.op (EndoMonoid B)} (\lam b a => f a b) t b
+  | sanity-check-foldr {A B : \Set} {f : A -> B -> B} {z : B} {t : T A}
+    : foldr {\this} {A} {B} f z t = foldMap {\this} {_} {_} {EndoMonoid B} f t z
+  | sanity-check-foldl {A B : \Set} {f : B -> A -> B} {z : B} {t : T A}
+    : foldl {\this} {A} {B} f z t = foldMap {\this} {_} {_} {Monoid.op (EndoMonoid B)} (\lam b a => f a b) t z
 
   \default foldMap \as foldMapImpl {M A : \Set} {m : Monoid M} (f : A -> M) (t : T A)
     => foldr ((*) o f) ide t
@@ -25,11 +25,11 @@
   \default fold \as foldImpl {M : \Set} {m : Monoid M} : T M -> M
   => foldMap {_} {_} {_} {m} id
 
-  \default foldr \as foldrImpl {A B : \Set} (f : A -> B -> B) (b : B) (t : T A) : B
-    => foldMap {_} {_} {_} {EndoMonoid B} f t b
+  \default foldr \as foldrImpl {A B : \Set} (f : A -> B -> B) (z : B) (t : T A) : B
+    => foldMap {_} {_} {_} {EndoMonoid B} f t z
 
-  \default foldl \as foldlImpl {A B : \Set} (f : B -> A -> B) (b : B) (t : T A) : B
-    => foldMap {_} {_} {_} {Monoid.op (EndoMonoid B)} (\lam b a => f a b) t b
+  \default foldl \as foldlImpl {A B : \Set} (f : B -> A -> B) (z : B) (t : T A) : B
+    => foldMap {_} {_} {_} {Monoid.op (EndoMonoid B)} (\lam z a => f a z) t z
 
   \func toList {A : \Set} : T A -> List A
     => foldr (::) nil
