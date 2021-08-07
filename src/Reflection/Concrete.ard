@@ -1,24 +1,26 @@
-\import Data.List
+\import Data.Foldable
+\import Data.List (List)
 \import Data.Traversable
+\import Meta
 
--- да, это конкретный тип, так норм
--- просто у него в операндах "дырки" типа A
--- по сути это теперь тип деревьев
--- Да
+\data Scope (F : \Set -> \Set) (A : \Set)
+  | scope (F A)
+
+
 \data Expr (A : \Set) : \Set
+  | free A
   | num (n : Int)
   | app (e : Expr A) (args : List (Expr A))
-  | lam (e : Expr A)
+  | lam (s : Scope Expr A)
 
--- именно так
 \instance ExprTrav : Traversable Expr
-  | sanity-check-fold => {?}
-  | sanity-check-foldr => {?}
-  | sanity-check-foldl => {?}
+  | sanity-check-fold => unfold Foldable.foldMapImpl idp
+  | sanity-check-foldr => unfold Foldable.foldMapImpl idp
+  | sanity-check-foldl => unfold Foldable.foldMapImpl idp
   | C => {?}
   | D => {?}
   | F => {?}
   | Func => {?}
   | Func-id => {?}
   | Func-o => {?}
-  | traverse => {?}
+  | traverse f x => {?} -- \let x' => f (ctx x) \in {?}
