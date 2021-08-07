@@ -46,7 +46,3 @@
   \default traverse \as traverseImpl {A B : \Set} {F : \Set -> \Set} {app : Applicative F} : (A -> F B) -> T A -> F (T B)
     => sequenceA o fmap __
 }
-
-\class Monad (M : \Set -> \Set) \extends Applicative {
-  | join {A : \Set} : M (M A) -> M A
-}

@@ -1,0 +1,21 @@
+\import Data.Functor
+\import Function
+
+\class Applicative \extends Functor
+  | pure {A : \Type} : A -> F A
+  | ap \alias \infixl 4 ⊗ {A B : \Type} : F (A -> B) -> F A -> F B
+  | pure-identity {A : \Type} {v : F A} : pure id ⊗ v = v
+  | pure-comp {A B C : \Type} {U : F (B -> C)} {V : F (A -> B)} {W : F A} : pure (o) ⊗ U ⊗ V ⊗ W = U ⊗ (V ⊗ W)
+  | pure-homo {A B : \Type} {f : A -> B} {x : A} : pure f ⊗ pure x = pure (f x)
+  | pure-interchange {A B : \Type} {u : F (A -> B)} {x : A} : u ⊗ pure x = pure {\this} {(A -> B) -> B} (__ x) ⊗ u
+
+\func IdApplicative : Applicative id \cowith
+  | fmap => IdFunctor.fmap
+  | fmap-id => IdFunctor.fmap-id
+  | fmap-comp => IdFunctor.fmap-comp
+  | pure => id
+  | ap => IdFunctor.fmap
+  | pure-identity => idp
+  | pure-comp => idp
+  | pure-homo => idp
+  | pure-interchange => idp

@@ -5,3 +5,13 @@
   | fmap-id {A : \Type} (y : F A) : fmap (\lam (x : A) => x) y = y
   | fmap-comp {A B C : \Type} (f : A -> B) (g : B -> C) (y : F A)
   : fmap (\lam x => g (f x)) y = fmap g (fmap f y)
+
+\func IdFunctor : Functor id \cowith
+  | fmap => __ __
+  | fmap-id => \lam _ => idp
+  | fmap-comp => \lam _ _ _ => idp
+
+\func CompFunctor (F G : \Type -> \Type) : Functor (F o G) \cowith
+  | fmap => \lam f x => F (G {?})
+  | fmap-id => \lam _ => idp
+  | fmap-comp => \lam _ _ _ => idp
