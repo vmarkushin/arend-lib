@@ -1,0 +1,20 @@
+\import Category
+\import Category.Functor
+\import Category.Product
+
+\func qwas (C : Precat) : FunctorPrecat {C} {ProductPrecat (ProductPrecat C C) C}
+  => {?}
+
+\func qwas2 (C : Precat) : FunctorPrecat {C} {ProductPrecat C (ProductPrecat C C)}
+  => {?}
+
+\func zaz (C : Precat) : qwas C = qwas2 C => {?}
+
+\class MonoidalPrecat \extends Precat
+  | tensorProduct \alias ⊗ : Functor (ProductPrecat \this \this) \this
+  | tensorUnit \alias tu : Ob
+  | associator {x y z : Ob} : ⊗ ((⊗ (x, y)), z) = ⊗ (x, ⊗ (y, z)) -- Is it ok?
+  | left-unitor : Nat -- FIXME
+  | right-unitor : Nat -- FIXME
+  | triangle-identity : Nat -- FIXME
+  | pentagon-identity : Nat -- FIXME

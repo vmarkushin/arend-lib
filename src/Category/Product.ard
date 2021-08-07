@@ -1,0 +1,11 @@
+\import Category
+\import Paths.Meta
+
+\func ProductPrecat (C D : Precat) : Precat \cowith
+  | Ob => \Sigma C.Ob D.Ob
+  | Hom (c, d) (c', d') => \Sigma (Hom c c') (Hom d d')
+  | id (c, d) => (id c, id d)
+  | o (g, g') (f, f') => (g ∘ f, g' ∘ f')
+  | id-left => rewrite id-left (rewrite id-left idp)
+  | id-right => rewrite id-right (rewrite id-right idp)
+  | o-assoc => rewrite o-assoc (rewrite o-assoc idp)
