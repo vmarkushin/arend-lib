@@ -10,36 +10,26 @@
 \import Set.Category
 \import Control.Applicative
 
-\class AppTrans (F G : \Set -> \Set)
-  | appTrans {A : \Set} {appf : Applicative F} {appg : Applicative G} : F A -> G A
+\class Traversable (T : \Set -> \Set) {FuncI : Functor T} {FoldI : Foldable T}  {
+  | traverse {A B : \Set} {F : \Set -> \Set} {AppF : Applicative F} : (A -> F B) -> T A -> F (T B)
+  | traverse-natural
+      {A B : \Set} {F G : \Set -> \Set} {AppF : Applicative F} {AppG : Applicative G}
+      {AT : AppTrans F G {AppF} {AppG}} (f : A -> F B)
+      : AT.trans {_} o traverse {\this} {_} {_} {_} {AppF} f = traverse {\this} {_} {_} {_} {AppG} (AT.trans {_} o f)
+  | traverse-id {A : \Set} : traverse {\this} {A} {_} {_} {IdApplicative} id = id
+  | traverse-comp
+      {A B C : \Set} {F G : \Set -> \Set}
+      {AppF : Applicative F} {AppG : Applicative G}
+      (f : A -> F B) (g : B -> G C)
+      : traverse {\this} {A} {C} {F o G} {CompApplicative F G {AppF} {AppG}} (fmap {AppF} g o f)
+      = fmap {AppF} (traverse {\this} {B} {C} {G} {AppG} g) o traverse {\this} {A} {B} {F} {AppF} f
 
-  | prop1 {A : \Set} {appf : Applicative F} {appg : Applicative G} (x : A)
-  : appTrans {\this} {A} {appf} {appg} (appf.pure x) = appg.pure x
+  \func sequenceA {A : \Set} {F : \Set -> \Set} {AppF : Applicative F} : T (F A) -> F (T A)
+    => traverse {_} {_} {_} {_} {AppF} id
 
-  | prop2 {A B : \Set} {appf : Applicative F} {appg : Applicative G} (x : F A) (f : F (A -> B))
-  : appTrans {\this} {_} {appf} {appg} (f appf.⊗ x) = appTrans {\this} {_} {appf} {appg} f appg.⊗ appTrans {\this} {_} {appf} {appg} x
+  \func mapM {A B : \Set} {M : \Set -> \Set} {MonM : Monad M} :  (A -> M B) -> T A -> M (T B)
+    => traverse {_} {_} {_} {_} {MonM}
 
-\class Traversable (T : \Set -> \Set) (FuncI : Functor T) (FoldI : Foldable T)  {
-  | traverse {A B : \Set} {F : \Set -> \Set} {app : Applicative F} : (A -> F B) -> T A -> F (T B)
-
-  | trav-naturality {A B : \Set} {F G : \Set -> \Set} {appf : Applicative F} {appg : Applicative G} {AT : AppTrans F G} (f : A -> F B)
-  : AT.appTrans {_} {appf} {appg} o traverse {\this} {_} {_} {_} {appf} f = traverse {\this} {_} {_} {_} {appg} (AT.appTrans {_} {appf} {appg} o f)
-
-  | trav-id {A : \Set} : traverse {\this} {A} {_} {_} {IdApplicative} id = id
-
-  | trav-comp {A B C : \Set} {F G : \Set -> \Set} {appf : Applicative F} {appg : Applicative G} (f : A -> F B) (g : B -> C)
-  : Nat -- FIXME WRONG SPEC
---   : traverse {\this} {_} {_} {_} {CompApplicative F G {appf} {appg}} ((Compose) o (appf.fmap {?} o {?})) = (Compose) o appg.fmap (traverse g) o traverse f
-
-  \func sequenceA {A : \Set} {F : \Set -> \Set} {app : Applicative F} : T (F A) -> F (T A)
-    => traverse {_} {_} {_} {_} {app} id
-
-  \func mapM {A B : \Set} {F : \Set -> \Set} {M : Monad F} :  (A -> M B) -> T A -> M (T B)
-    => traverse {_} {_} {_} {_} {M}
-
-  \func sequence {A B : \Set} {F : \Set -> \Set} {M : Monad F} : T (M A) -> M (T A)
+  \func sequence {A B : \Set} {M : \Set -> \Set} {MonM : Monad M} : T (M A) -> M (T A)
     => sequenceA
-
-  \default traverse \as traverseImpl {A B : \Set} {F : \Set -> \Set} {app : Applicative F} : (A -> F B) -> T A -> F (T B)
-    => sequenceA o fmap __
 }
