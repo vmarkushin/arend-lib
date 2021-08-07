@@ -3,24 +3,57 @@
 \import Data.Traversable
 \import Meta
 
-\data Scope (F : \Set -> \Set) (A : \Set)
-  | scope (F A)
+-- [data {?}, data {?}, data {?}, record [Sign, Sign, Sign], data {?}, data {?}]
 
+\data A
 
-\data Expr (A : \Set) : \Set
+\data B
+
+-- TODO add signatures and whatever
+-- \data GlobalTag
+--   | Function
+--   | Class
+--   | Data
+
+\record GlobalCtx
+  | datas : List Nat -- FIXME
+  | classes : List Nat -- FIXME
+  | funcs : List Expr -- FIXME
+
+-- \func zz => 1 +
+-- \func x => y
+--      ^ Arg ^ Expr
+
+\data Scope (B : \Set) (F : \Set -> \Set) (A : \Set)
+--  unscope :: f (Var b (f a))
+  | unscope (F  A)
+
+\data Expr
+
+\data Term : \Set
+  | data
+  | func Expr
+  | class
+  | expr Expr
+
+\data ExprF (A : \Set) : \Set
   | free A
   | num (n : Int)
-  | app (e : Expr A) (args : List (Expr A))
-  | lam (s : Scope Expr A)
+  | app (e : A) (args : List A)
+  | lam (s : Scope Nat A)
 
-\instance ExprTrav : Traversable Expr
-  | sanity-check-fold => unfold Foldable.foldMapImpl idp
-  | sanity-check-foldr => unfold Foldable.foldMapImpl idp
-  | sanity-check-foldl => unfold Foldable.foldMapImpl idp
-  | C => {?}
-  | D => {?}
-  | T => {?}
-  | Func => {?}
-  | Func-id => {?}
-  | Func-o => {?}
-  | traverse f x => {?} -- \let x' => f (ctx x) \in {?}
+--\instance ExprTrav : Traversable Expr
+--  | sanity-check-fold => unfold Foldable.foldMapImpl idp
+--  | sanity-check-foldr => unfold Foldable.foldMapImpl idp
+--  | sanity-check-foldl => unfold Foldable.foldMapImpl idp
+--  | C => {?}
+--  | D => {?}
+--  | T => {?}
+--  | Func => {?}
+--  | Func-id => {?}
+--  | Func-o => {?}
+--  | traverse f x => {?} -- \let x' => f (ctx x) \in {?}
+
+-- infixl 9 :@
+-- data Exp a = V a | Exp a :@ Exp a | Lam (Scope () Exp a)
+--     deriving (Functor,Foldable,Traversable)

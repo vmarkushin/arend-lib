@@ -27,12 +27,9 @@
 
   | trav-id {A : \Set} : traverse {\this} {A} {_} {_} {IdApplicative} id = id
 
--- traverse (Compose . fmap g . f) = Compose . fmap (traverse g) . traverse f
-  | trav-comp {A B C : \Set} {F G : \Set -> \Set} {appf : Applicative F} {appg : Applicative G} {AT : AppTrans F G} (f : A -> B) (g : B -> C)
-  : traverse {\this} {_} {_} {_} {appf} (FuncI.fmap f) = traverse {\this} {_} {_} {_} {appf} (FuncI.fmap f)
---  : traverse {\this} {_} {_} {_} {appf} (FuncI.fmap g o f) = traverse {\this} {_} {_} {_} {appf} (FuncI.fmap g o f)
---  : traverse {\this} {_} {_} {F} {_} ((o) o (fmap g o f)) = (o) o fmap (traverse g) o traverse f
-
+  | trav-comp {A B C : \Set} {F G : \Set -> \Set} {appf : Applicative F} {appg : Applicative G} (f : A -> F B) (g : B -> C)
+  : Nat -- FIXME WRONG SPEC
+--   : traverse {\this} {_} {_} {_} {CompApplicative F G {appf} {appg}} ((Compose) o (appf.fmap {?} o {?})) = (Compose) o appg.fmap (traverse g) o traverse f
 
   \func sequenceA {A : \Set} {F : \Set -> \Set} {app : Applicative F} : T (F A) -> F (T A)
     => traverse {_} {_} {_} {_} {app} id

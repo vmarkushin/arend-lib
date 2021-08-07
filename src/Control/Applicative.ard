@@ -1,5 +1,9 @@
 \import Data.Functor
 \import Function
+\import Function.Meta
+\import Meta
+\import Paths
+\import Paths.Meta
 
 \class Applicative \extends Functor
   | pure {A : \Type} : A -> F A
@@ -12,10 +16,28 @@
 \func IdApplicative : Applicative id \cowith
   | fmap => IdFunctor.fmap
   | fmap-id => IdFunctor.fmap-id
-  | fmap-comp => IdFunctor.fmap-comp
+  | fmap-comp => idp
   | pure => id
-  | ap => IdFunctor.fmap
+  | ap => __ __
   | pure-identity => idp
   | pure-comp => idp
   | pure-homo => idp
   | pure-interchange => idp
+
+{-
+
+ -}
+
+-- original: AppF.fmap (AppG.⊗) ((o) AppF.pure AppG.pure id) AppF.⊗ v = v
+--   Expected type: AppF.fmap (AppG.⊗) ((o) AppF.pure AppG.pure id) AppF.⊗ v = AppF.pure id AppF.⊗ v
+
+\func CompApplicative (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G} : Applicative (F o G) \cowith
+  | fmap => fmap {CompFunctor F G}
+  | fmap-id => fmap-id {CompFunctor F G}
+  | fmap-comp => fmap-comp {CompFunctor F G}
+  | pure => pure o pure
+  | ap => fmap (⊗) __ ⊗ __
+  | pure-identity {A} {v} => rewriteI {5} AppF.pure-identity $ pmap (__ ⊗ v) $ {?}
+  | pure-comp => {?}
+  | pure-homo => {?}
+  | pure-interchange => {?}
