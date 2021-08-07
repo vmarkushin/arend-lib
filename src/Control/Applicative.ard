@@ -24,20 +24,19 @@
   | pure-homo => idp
   | pure-interchange => idp
 
-{-
-
- -}
-
--- original: AppF.fmap (AppG.⊗) ((o) AppF.pure AppG.pure id) AppF.⊗ v = v
---   Expected type: AppF.fmap (AppG.⊗) ((o) AppF.pure AppG.pure id) AppF.⊗ v = AppF.pure id AppF.⊗ v
-
 \func CompApplicative (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G} : Applicative (F o G) \cowith
   | fmap => fmap {CompFunctor F G}
   | fmap-id => fmap-id {CompFunctor F G}
   | fmap-comp => fmap-comp {CompFunctor F G}
   | pure => pure o pure
-  | ap => fmap (⊗) __ ⊗ __
+  | ap => (⊗) <$> __ ⊗ __
   | pure-identity {A} {v} => rewriteI {5} AppF.pure-identity $ pmap (__ ⊗ v) $ {?}
   | pure-comp => {?}
   | pure-homo => {?}
   | pure-interchange => {?}
+
+\class AppTrans (F G : \Set -> \Set) {AppF : Applicative F} {AppG : Applicative G}
+  | trans {A : \Set} : F A -> G A
+  | trans-id-pure {A : \Set} {x : A} : trans {\this} {_} (AppF.pure x) = AppG.pure x
+  | trans-comm-ap {A B : \Set} {f : F (A -> B)} {x : F A}
+    : trans {\this} {_} (f ⊗ x) = trans {\this} {_} f ⊗ trans {\this} {_} x

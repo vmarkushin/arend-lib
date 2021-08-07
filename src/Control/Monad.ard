@@ -1,4 +1,5 @@
 \import Control.Applicative
+\import Data.Functor
 \import Function
 
 \class Monad \extends Applicative {
@@ -18,3 +19,19 @@
   \func \infixl 1 >> {A B : \Type} : F A -> F B -> F B
     => \lam ma k => ma >>= (\lam _ => k)
 }
+
+\func IdMonad : Monad id \cowith
+  | fmap => IdApplicative.fmap
+  | fmap-id => IdApplicative.fmap-id
+  | fmap-comp => idp
+  | pure => IdApplicative.pure
+  | ap => IdApplicative.ap
+  | pure-identity => idp
+  | pure-comp => idp
+  | pure-homo => idp
+  | pure-interchange => idp
+  | join => id
+  | join-right-id => idp
+  | join-left-id => idp
+  | join-assoc => idp
+  | sanity-check-bind => idp
