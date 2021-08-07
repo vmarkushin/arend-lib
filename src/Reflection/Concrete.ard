@@ -1,6 +1,10 @@
 \import Data.Foldable
-\import Data.List (List)
+\import Data.Functor
+\import Data.List (List, map \as listMap)
 \import Data.Traversable
+\import Debug.Meta
+\import Function
+\import Function.Meta
 \import Meta
 
 -- [data {?}, data {?}, data {?}, record [Sign, Sign, Sign], data {?}, data {?}]
@@ -15,32 +19,85 @@
 --   | Class
 --   | Data
 
-\record GlobalCtx
-  | datas : List Nat -- FIXME
-  | classes : List Nat -- FIXME
-  | funcs : List Expr -- FIXME
+--\record GlobalCtx
+--  | datas : List Nat -- FIXME
+--  | classes : List Nat -- FIXME
+--  | funcs : List Expr -- FIXME
 
 -- \func zz => 1 +
 -- \func x => y
 --      ^ Arg ^ Expr
 
-\data Scope (B : \Set) (F : \Set -> \Set) (A : \Set)
---  unscope :: f (Var b (f a))
-  | unscope (F  A)
+\data Var (A B : \Set)
+  | Bound B
+  | Free A
 
-\data Expr
+\record ScopeF (B : \Set) (F : \Set -> \Set) (A : \Set)
+  | unscopeF : (F (Var B (F A)))
 
-\data Term : \Set
-  | data
-  | func Expr
-  | class
-  | expr Expr
+\record Scope (B : \Set) (F : \Set -> \Set) (FA : \Set)
+  | unscope : (F (Var B (FA)))
+
+--\data Expr
+--
+--\data Term : \Set
+--  | data
+--  | func Expr
+--  | class
+--  | expr Expr
+
+\data Unit : \Set
+  | unit
+
+\data Expr : \Set
+  | var
+  | num (n : Int)
+  | app (e : Expr) (args : List (Expr))
+  | lam (s : Expr)
 
 \data ExprF (A : \Set) : \Set
-  | free A
-  | num (n : Int)
-  | app (e : A) (args : List A)
-  | lam (s : Scope Nat A)
+  | varF A
+  | numF (n : Int)
+  | appF (e : ExprF A) (args : ExprF A) -- FIXME: args should be List
+  | lamF (s : Scope Unit ExprF Expr)
+
+\instance ListFunctor : Functor List
+  | fmap => listMap
+  | fmap-id => {?}
+  | fmap-comp => {?}
+
+\func map {A B : \Set} (f : A -> B) (e : ExprF A) : ExprF B \elim e
+  | varF a => varF (f a)
+  | numF n => numF n
+  | appF e args => appF (map f e) (map f args)
+  | lamF s => lamF s
+
+\func fmap-id' {A B : \Type} {F : \Type -> \Type} {y : F A} (fmap : \Pi (A B : \Type) (A -> B) -> F A -> F B) : fmap A A id y = y
+  => {?}
+
+\instance ExprFFunctor (A : \Set) : Functor ExprF
+  | fmap => map
+  | fmap-id {A} {e} => \case \elim e \with {
+    | varF a => idp
+    | numF n => idp
+    | appF e1 args => \case \elim e1, \elim args \with {
+      | varF a, varF a1 => idp
+      | varF a, numF n => idp
+      | varF a, appF args args1 => {?}
+      | varF a, lamF s => idp
+      | numF n, varF a => idp
+      | numF n, numF n1 => idp
+      | numF n, appF args args1 => idp
+      | numF n, lamF s => idp
+      | appF e1 e2, varF a => idp
+      | appF e1 e2, numF n => idp
+      | lamF s, args => {?}
+      | appF e1 e2, appF args args1 => {?}
+      | appF e1 e2, lamF s => {?}
+    }
+    | lamF s => idp
+  }
+  | fmap-comp => {?}
 
 --\instance ExprTrav : Traversable Expr
 --  | sanity-check-fold => unfold Foldable.foldMapImpl idp
