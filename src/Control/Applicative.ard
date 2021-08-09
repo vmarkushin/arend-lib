@@ -5,7 +5,7 @@
 \import Paths
 \import Paths.Meta
 
-\class Applicative \extends Functor
+\class Applicative \extends Functor {
   | pure {A : \Type} : A -> F A
   | ap \alias \infixl 4 ⊛ {A B : \Type} : F (A -> B) -> F A -> F B
   | pure-identity {A : \Type} {v : F A} : pure id ⊛ v = v
@@ -13,8 +13,27 @@
   | pure-homo {A B : \Type} {f : A -> B} {x : A} : pure f ⊛ pure x = pure (f x)
   | pure-interchange {A B : \Type} {u : F (A -> B)} {x : A} : u ⊛ pure x = pure {\this} {(A -> B) -> B} (__ x) ⊛ u
 
-\func mult {F : \Type -> \Type} {AppF : Applicative F} {A B : \Type} : F A -> F B -> F (\Sigma A B)
-  => pure (__, __) ⊛ __ ⊛ __
+  \func mult {AppF : Applicative F} {A B : \Type} : F A -> F B -> F (\Sigma A B)
+    => pure (__, __) ⊛ __ ⊛ __
+}
+
+-- \func pure-identity-pointfree {A : \Type} {F : \Type -> \Type} {AppF : Applicative F} : AppF.ap (pure (id {A -> A})) = id {F (A -> A)}
+--   => ext (\lam _ => pure-identity)
+
+-- \func pure-identity-pointfree' {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} : AppF.ap o AppF.pure {A -> B} = AppF.fmap
+--   => ext (\lam x f => {?})
+
+-- \func pure-identity-pointfree'' {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} : AppF.ap (pure f) = fmap f
+--  => pmap (__ f) pure-identity-pointfree'
+
+-- \func pure-homo-pointfree1 {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} : ap (pure f) o pure = AppF.pure o f
+--   => ext (\lam _ => pure-homo)
+
+-- \func pure-homo-pointfree2 {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {x : A} : (\lam (f : A -> B) => pure f ⊛ pure x) = (\lam f => AppF.pure (f x))
+--   => ext (\lam _ => pure-homo)
+
+-- \func pure-homo-pointfree-both {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} : (\lam (f : A -> B) (x : A) => pure f ⊛ pure x) = (o AppF.pure)
+--   => ext (\lam _ _ => pure-homo)
 
 \func IdApplicative : Applicative id \cowith
   | fmap => IdFunctor.fmap
@@ -26,17 +45,6 @@
   | pure-comp => idp
   | pure-homo => idp
   | pure-interchange => idp
-
-\func CompApplicative (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G} : Applicative (F o G) \cowith
-  | fmap => fmap {CompFunctor F G {AppF} {AppG}}
-  | fmap-id => fmap-id {CompFunctor F G}
-  | fmap-comp => fmap-comp {CompFunctor F G}
-  | pure => pure o pure
-  | ap => (⊛) <$> __ ⊛ __
-  | pure-identity => {?}
-  | pure-comp => {?}
-  | pure-homo => {?}
-  | pure-interchange => {?}
 
 \class AppTrans (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G}
   | trans {A : \Type} : F A -> G A
@@ -58,3 +66,22 @@
 
 \func fmap-pure {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} {x : A} : AppF.pure (f x) = f <$> pure x
   => pmap (__ x) fmap-pure-pointfree
+
+\func CompApplicative (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G} : Applicative (F o G) \cowith
+  | fmap => fmap {CompFunctor F G {AppF} {AppG}}
+  | fmap-id => fmap-id {CompFunctor F G}
+  | fmap-comp => fmap-comp {CompFunctor F G}
+  | pure => pure o pure
+  | ap => (⊛) <$> __ ⊛ __
+  | pure-identity {A} {v} => run {
+      rewrite (fmap-pure {_} {_} {F} {AppF} {AppG.pure}),
+      rewriteI (AppF.fmap-comp),
+      rewriteI (fmap-pure {_} {_} {F} {AppF} ),
+      rewriteI {4} AppF.pure-identity,
+      pmap (__ ⊛ v),
+      pmap pure,
+      ext (\lam _ => pure-identity)
+  }
+  | pure-comp => {?}
+  | pure-homo => {?}
+  | pure-interchange => {?}
