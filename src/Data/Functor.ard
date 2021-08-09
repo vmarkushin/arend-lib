@@ -1,13 +1,19 @@
 \import Function
 \import Function.Meta
-\import Meta
+\import Logic
 \import Paths
 \import Paths.Meta
 
-\class Functor (F : \Type -> \Type)
+\class Functor (\classifying F : \Type -> \Type)
   | fmap \alias \infixl 4 <$> {A B : \Type} (f : A -> B) : F A -> F B
   | fmap-id {A : \Type} {y : F A} : fmap id y = y
   | fmap-comp {A B C : \Type} {f : A -> B} {g : B -> C} {y : F A} : fmap (g o f) y = fmap g (fmap f y)
+
+\func fmap-id-pointfree {F : \Type -> \Type} {FuncF : Functor F} {A : \Type} : FuncF.fmap {A} id = id
+  => ext (\lam _ => rewrite FuncF.fmap-id idp)
+
+\func fmap-comp-pointfree {F : \Type -> \Type} {FuncF : Functor F} {A B C : \Type} {f : A -> B} {g : B -> C} : FuncF.fmap (g o f) = fmap g o fmap f
+  => ext (\lam _ => rewrite FuncF.fmap-comp idp)
 
 \func IdFunctor : Functor id \cowith
   | fmap => __ __
@@ -16,8 +22,6 @@
 
 \func CompFunctor (F G : \Type -> \Type) {FuncF : Functor F} {FuncG : Functor G} : Functor (F o G) \cowith
   | fmap f => FuncF.fmap (FuncG.fmap f)
-  | fmap-id {A} {y} => rewrite (fmap-id-pointfree {G} {_}) $ FuncF.fmap-id
-  | fmap-comp {A} {_} {_} {f} {g} {y} => rewriteI FuncF.fmap-comp $ pmap (FuncF.fmap __ y) $ ext $ (\lam _ => FuncG.fmap-comp)
-  \where
-    \func fmap-id-pointfree {F : \Type -> \Type} {FuncF : Functor F} {A : \Type}: FuncF.fmap {A} id = id
-      => ext $ (\lam f => $ rewrite FuncF.fmap-id idp)
+  | fmap-id {A} {y} => rewrite (fmap-id-pointfree {_} {FuncG}) FuncF.fmap-id
+  | fmap-comp {_} {_} {_} {f} {g} {y} => rewrite (fmap-comp-pointfree {G} {_} {_} {_} {_} {f} {g}) $ rewriteI FuncF.fmap-comp idp
+--  | fmap-comp {_} {_} {_} {_} {_} {y} => rewriteI FuncF.fmap-comp $ pmap (FuncF.fmap __ y) $ ext $ (\lam _ => FuncG.fmap-comp)

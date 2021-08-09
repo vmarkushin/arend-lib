@@ -1,116 +1,37 @@
+\import Control.Applicative
+\import Control.Monad
 \import Data.Foldable
 \import Data.Functor
 \import Data.List (List, map \as listMap)
+\import Data.Maybe
 \import Data.Traversable
 \import Debug.Meta
 \import Function
 \import Function.Meta
 \import Meta
+\import Paths.Meta
 
--- [data {?}, data {?}, data {?}, record [Sign, Sign, Sign], data {?}, data {?}]
-
-\data A
-
-\data B
-
--- TODO add signatures and whatever
--- \data GlobalTag
---   | Function
---   | Class
---   | Data
-
---\record GlobalCtx
---  | datas : List Nat -- FIXME
---  | classes : List Nat -- FIXME
---  | funcs : List Expr -- FIXME
-
--- \func zz => 1 +
--- \func x => y
---      ^ Arg ^ Expr
-
-\data Var (A B : \Set)
+\data Var (B A : \Set)
   | Bound B
   | Free A
 
-\record ScopeF (B : \Set) (F : \Set -> \Set) (A : \Set)
-  | unscopeF : (F (Var B (F A)))
-
-\record Scope (B : \Set) (F : \Set -> \Set) (FA : \Set)
-  | unscope : (F (Var B (FA)))
-
---\data Expr
---
---\data Term : \Set
---  | data
---  | func Expr
---  | class
---  | expr Expr
-
-\data Unit : \Set
-  | unit
-
-\data Expr : \Set
-  | var
-  | num (n : Int)
-  | app (e : Expr) (args : List (Expr))
-  | lam (s : Expr)
-
-\data ExprF (A : \Set) : \Set
-  | varF A
+\data ExprF (ctx : \Set) : \Set
+  | varF ctx
   | numF (n : Int)
-  | appF (e : ExprF A) (args : ExprF A) -- FIXME: args should be List
-  | lamF (s : Scope Unit ExprF Expr)
+  | appF (e : ExprF ctx) (args : List (ExprF ctx))
+  | lamF (e : ExprF (Maybe ctx))
 
-\instance ListFunctor : Functor List
-  | fmap => listMap
-  | fmap-id => {?}
-  | fmap-comp => {?}
-
-\func map {A B : \Set} (f : A -> B) (e : ExprF A) : ExprF B \elim e
-  | varF a => varF (f a)
-  | numF n => numF n
-  | appF e args => appF (map f e) (map f args)
-  | lamF s => lamF s
-
-\func fmap-id' {A B : \Type} {F : \Type -> \Type} {y : F A} (fmap : \Pi (A B : \Type) (A -> B) -> F A -> F B) : fmap A A id y = y
-  => {?}
-
-\instance ExprFFunctor (A : \Set) : Functor ExprF
-  | fmap => map
-  | fmap-id {A} {e} => \case \elim e \with {
-    | varF a => idp
-    | numF n => idp
-    | appF e1 args => \case \elim e1, \elim args \with {
-      | varF a, varF a1 => idp
-      | varF a, numF n => idp
-      | varF a, appF args args1 => {?}
-      | varF a, lamF s => idp
-      | numF n, varF a => idp
-      | numF n, numF n1 => idp
-      | numF n, appF args args1 => idp
-      | numF n, lamF s => idp
-      | appF e1 e2, varF a => idp
-      | appF e1 e2, numF n => idp
-      | lamF s, args => {?}
-      | appF e1 e2, appF args args1 => {?}
-      | appF e1 e2, lamF s => {?}
-    }
-    | lamF s => idp
-  }
-  | fmap-comp => {?}
-
---\instance ExprTrav : Traversable Expr
---  | sanity-check-fold => unfold Foldable.foldMapImpl idp
---  | sanity-check-foldr => unfold Foldable.foldMapImpl idp
---  | sanity-check-foldl => unfold Foldable.foldMapImpl idp
---  | C => {?}
---  | D => {?}
---  | T => {?}
---  | Func => {?}
---  | Func-id => {?}
---  | Func-o => {?}
---  | traverse f x => {?} -- \let x' => f (ctx x) \in {?}
-
--- infixl 9 :@
--- data Exp a = V a | Exp a :@ Exp a | Lam (Scope () Exp a)
---     deriving (Functor,Foldable,Traversable)
+-- \func abstract {A B : \Set} {F : \Set -> \Set} {M : Monad F} (f : A -> Maybe B) (e : F A) : Scope B F (F A) \cowith
+--   | unscope => M.fmap (\lam (y : A) => \case f y \with {
+--     | nothing => Free (M.pure y)
+--     | just z => Bound z
+--   }) e
+--
+-- \func instantiate {A B : \Set} {F : \Set -> \Set} {M : Monad F} (k : B -> F A) (s : Scope B F (F A)) : F A
+--   => s.unscope >>= (\lam v => \case v \with {
+--     | Bound b => k b
+--     | Free a => a
+--   })
+--
+-- \func abs-inst {A B : \Set} (f : A -> Maybe B) (e : ExprF A) : instantiate _ (abstract f e)  = e
+--   => {?}

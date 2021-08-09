@@ -7,16 +7,19 @@
 
 \class Applicative \extends Functor
   | pure {A : \Type} : A -> F A
-  | ap \alias \infixl 4 ⊗ {A B : \Type} : F (A -> B) -> F A -> F B
-  | pure-identity {A : \Type} {v : F A} : pure id ⊗ v = v
-  | pure-comp {A B C : \Type} {U : F (B -> C)} {V : F (A -> B)} {W : F A} : pure (o) ⊗ U ⊗ V ⊗ W = U ⊗ (V ⊗ W)
-  | pure-homo {A B : \Type} {f : A -> B} {x : A} : pure f ⊗ pure x = pure (f x)
-  | pure-interchange {A B : \Type} {u : F (A -> B)} {x : A} : u ⊗ pure x = pure {\this} {(A -> B) -> B} (__ x) ⊗ u
+  | ap \alias \infixl 4 ⊛ {A B : \Type} : F (A -> B) -> F A -> F B
+  | pure-identity {A : \Type} {v : F A} : pure id ⊛ v = v
+  | pure-comp {A B C : \Type} {U : F (B -> C)} {V : F (A -> B)} {W : F A} : pure (o) ⊛ U ⊛ V ⊛ W = U ⊛ (V ⊛ W)
+  | pure-homo {A B : \Type} {f : A -> B} {x : A} : pure f ⊛ pure x = pure (f x)
+  | pure-interchange {A B : \Type} {u : F (A -> B)} {x : A} : u ⊛ pure x = pure {\this} {(A -> B) -> B} (__ x) ⊛ u
+
+-- \func pure-app {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} {v : F A} : pure f ⊛ v = f <$> v
+--  => {?}
 
 \func IdApplicative : Applicative id \cowith
   | fmap => IdFunctor.fmap
   | fmap-id => IdFunctor.fmap-id
-  | fmap-comp => idp
+  | fmap-comp {_ B C : \Type} {_} {g : B -> C} => IdFunctor.fmap-comp {_} {_} {_} {_} {g}
   | pure => id
   | ap => __ __
   | pure-identity => idp
@@ -25,18 +28,18 @@
   | pure-interchange => idp
 
 \func CompApplicative (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G} : Applicative (F o G) \cowith
-  | fmap => fmap {CompFunctor F G}
+  | fmap => fmap {CompFunctor F G {AppF} {AppG}}
   | fmap-id => fmap-id {CompFunctor F G}
   | fmap-comp => fmap-comp {CompFunctor F G}
   | pure => pure o pure
-  | ap => (⊗) <$> __ ⊗ __
-  | pure-identity {A} {v} => rewriteI {5} AppF.pure-identity $ pmap (__ ⊗ v) $ {?}
+  | ap => (⊛) <$> __ ⊛ __
+  | pure-identity => {?}
   | pure-comp => {?}
   | pure-homo => {?}
   | pure-interchange => {?}
 
 \class AppTrans (F G : \Set -> \Set) {AppF : Applicative F} {AppG : Applicative G}
   | trans {A : \Set} : F A -> G A
-  | trans-id-pure {A : \Set} {x : A} : trans {\this} {_} (AppF.pure x) = AppG.pure x
+  | trans-id-pure {A : \Set} {x : A} : trans (pure x) = pure x
   | trans-comm-ap {A B : \Set} {f : F (A -> B)} {x : F A}
-    : trans {\this} {_} (f ⊗ x) = trans {\this} {_} f ⊗ trans {\this} {_} x
+    : trans (f ⊛ x) = trans f ⊛ trans x

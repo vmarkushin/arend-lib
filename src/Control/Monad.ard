@@ -1,6 +1,9 @@
 \import Control.Applicative
 \import Data.Functor
 \import Function
+\import Function.Meta
+\import Meta
+\import Paths.Meta
 
 \class Monad \extends Applicative {
   | join {A : \Type} : F (F A) -> F A
@@ -23,13 +26,13 @@
 \func IdMonad : Monad id \cowith
   | fmap => IdApplicative.fmap
   | fmap-id => IdApplicative.fmap-id
-  | fmap-comp => idp
+  | fmap-comp {_} => IdApplicative.fmap-comp
   | pure => IdApplicative.pure
   | ap => IdApplicative.ap
-  | pure-identity => idp
-  | pure-comp => idp
-  | pure-homo => idp
-  | pure-interchange => idp
+  | pure-identity => IdApplicative.pure-identity
+  | pure-comp {_} => IdApplicative.pure-comp
+  | pure-homo {_} => IdApplicative.pure-homo
+  | pure-interchange {_} => IdApplicative.pure-interchange
   | join => id
   | join-right-id => idp
   | join-left-id => idp
