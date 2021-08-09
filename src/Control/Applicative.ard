@@ -13,8 +13,8 @@
   | pure-homo {A B : \Type} {f : A -> B} {x : A} : pure f ⊛ pure x = pure (f x)
   | pure-interchange {A B : \Type} {u : F (A -> B)} {x : A} : u ⊛ pure x = pure {\this} {(A -> B) -> B} (__ x) ⊛ u
 
--- \func pure-app {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} {v : F A} : pure f ⊛ v = f <$> v
---  => {?}
+\func mult {F : \Type -> \Type} {AppF : Applicative F} {A B : \Type} : F A -> F B -> F (\Sigma A B)
+  => pure (__, __) ⊛ __ ⊛ __
 
 \func IdApplicative : Applicative id \cowith
   | fmap => IdFunctor.fmap
@@ -38,8 +38,23 @@
   | pure-homo => {?}
   | pure-interchange => {?}
 
-\class AppTrans (F G : \Set -> \Set) {AppF : Applicative F} {AppG : Applicative G}
-  | trans {A : \Set} : F A -> G A
-  | trans-id-pure {A : \Set} {x : A} : trans (pure x) = pure x
-  | trans-comm-ap {A B : \Set} {f : F (A -> B)} {x : F A}
-    : trans (f ⊛ x) = trans f ⊛ trans x
+\class AppTrans (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G}
+  | trans {A : \Type} : F A -> G A
+  | trans-id-pure {A : \Type} {x : A} : trans (pure x) = pure x
+  | trans-comm-ap {A B : \Type} {f : F (A -> B)} {x : F A} : trans (f ⊛ x) = trans f ⊛ trans x
+
+-- gut feeling that it's kinda OK
+\func app-trans-natural {F G : \Type -> \Type} {AppF : Applicative F} {AppG : Applicative G} {AT : AppTrans F G} {A B : \Type} {f : A -> B}
+  : AT.trans o AppF.fmap f = AppG.fmap f o AT.trans
+  => ext (\lam x => {?})
+
+\func pure-is-app-trans {F : \Type -> \Type} {AppF : Applicative F} : AppTrans id F {IdApplicative} {AppF} \cowith
+  | trans => AppF.pure
+  | trans-id-pure => idp
+  | trans-comm-ap => rewrite AppF.pure-homo idp
+
+\func fmap-pure-pointfree {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} : AppF.pure o f = fmap f o pure
+  => app-trans-natural {id} {F} {IdApplicative} {AppF} {pure-is-app-trans}
+
+\func fmap-pure {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} {x : A} : AppF.pure (f x) = f <$> pure x
+  => pmap (__ x) fmap-pure-pointfree
