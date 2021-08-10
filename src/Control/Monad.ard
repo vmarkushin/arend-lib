@@ -29,10 +29,12 @@
   | fmap-comp {_} => IdApplicative.fmap-comp
   | pure => IdApplicative.pure
   | ap => IdApplicative.ap
-  | pure-identity => IdApplicative.pure-identity
+  | pure-fmap => unfold idp
   | pure-comp {_} => IdApplicative.pure-comp
   | pure-homo {_} => IdApplicative.pure-homo
   | pure-interchange {_} => IdApplicative.pure-interchange
+  | sanity-check-ap => unfold idp
+  | sanity-check-lift => unfold idp
   | join => id
   | join-right-id => idp
   | join-left-id => idp

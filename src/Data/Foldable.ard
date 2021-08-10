@@ -12,12 +12,12 @@
   | foldr {A B : \Set} (f : A -> B -> B) (z : B) (t : T A) : B
   | foldl {A B : \Set} (f : B -> A -> B) (z : B) (t : T A) : B
 
---  | sanity-check-fold {M A : \Set} {m : Monoid M}
---    : fold {\this} {M} {m} = foldMap {\this} {M} {M} {m} id
---  | sanity-check-foldr {A B : \Set} {f : A -> B -> B} {z : B} {t : T A}
---    : foldr {\this} {A} {B} f z t = foldMap {\this} {_} {_} {EndoMonoid B} f t z
---  | sanity-check-foldl {A B : \Set} {f : B -> A -> B} {z : B} {t : T A}
---    : foldl {\this} {A} {B} f z t = foldMap {\this} {_} {_} {Monoid.op (EndoMonoid B)} (\lam b a => f a b) t z
+  | sanity-check-fold {M A : \Set} {m : Monoid M}
+    : fold {\this} {M} {m} = foldMap {\this} {M} {M} {m} id
+  | sanity-check-foldr {A B : \Set} {f : A -> B -> B} {z : B} {t : T A}
+    : foldr {\this} {A} {B} f z t = foldMap {\this} {_} {_} {EndoMonoid B} f t z
+  | sanity-check-foldl {A B : \Set} {f : B -> A -> B} {z : B} {t : T A}
+    : foldl {\this} {A} {B} f z t = foldMap {\this} {_} {_} {Monoid.op (EndoMonoid B)} (\lam b a => f a b) t z
 
   \default foldMap \as foldMapImpl {M A : \Set} {m : Monoid M} (f : A -> M) (t : T A)
     => foldr ((*) o f) ide t
@@ -43,10 +43,10 @@
 
 \instance ListFoldable : Foldable List
   | foldr              => Data.List.foldr
---  | sanity-check-fold  => unfold Foldable.foldMapImpl idp
---  | sanity-check-foldl => unfold Foldable.foldlImpl idp
---  | sanity-check-foldr => unfold Foldable.foldMapImpl (unfold helper)
---  \where
---    \func helper {A B : \Set} {f : A -> B -> B} {b : B} {t : List A} : Data.List.foldr f b t = Data.List.foldr ((o) o f) id t b \elim t
---     | nil    => idp
---     | :: a t => pmap (f a __) helper
+  | sanity-check-fold  => unfold Foldable.foldMapImpl idp
+  | sanity-check-foldl => unfold Foldable.foldlImpl idp
+  | sanity-check-foldr => unfold Foldable.foldMapImpl (unfold helper)
+  \where
+    \func helper {A B : \Set} {f : A -> B -> B} {b : B} {t : List A} : Data.List.foldr f b t = Data.List.foldr ((o) o f) id t b \elim t
+     | nil    => idp
+     | :: a t => pmap (f a __) helper

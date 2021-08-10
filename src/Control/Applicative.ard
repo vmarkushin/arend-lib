@@ -8,32 +8,30 @@
 \class Applicative \extends Functor {
   | pure {A : \Type} : A -> F A
   | ap \alias \infixl 4 ⊛ {A B : \Type} : F (A -> B) -> F A -> F B
-  | pure-identity {A : \Type} {v : F A} : pure id ⊛ v = v
+  | pure-fmap {A B : \Type} {f : A -> B} {v : F A} : pure f ⊛ v = f <$> v
   | pure-comp {A B C : \Type} {U : F (B -> C)} {V : F (A -> B)} {W : F A} : pure (o) ⊛ U ⊛ V ⊛ W = U ⊛ (V ⊛ W)
   | pure-homo {A B : \Type} {f : A -> B} {x : A} : pure f ⊛ pure x = pure (f x)
   | pure-interchange {A B : \Type} {u : F (A -> B)} {x : A} : u ⊛ pure x = pure {\this} {(A -> B) -> B} (__ x) ⊛ u
 
-  \func mult {AppF : Applicative F} {A B : \Type} : F A -> F B -> F (\Sigma A B)
+  | liftA2 {A B C : \Type} : (A -> B -> C) -> F A -> F B -> F C
+  | sanity-check-ap {A B : \Type} : ap {\this} {A} {B} = liftA2 {\this} {_} {_} id
+  | sanity-check-lift {A B C : \Type} {f : A -> B -> C} {u : F A} {v : F B} : liftA2 f u v = f <$> u ⊛ v
+
+  \default ap \as apImpl {A B : \Type} : F (A -> B) -> F A -> F B
+  => liftA2 id
+
+  \default liftA2 \as liftA2Impl {A B C : \Type} : (A -> B -> C) -> F A -> F B -> F C
+    => \lam f u v => f <$> u ⊛ v
+
+  \func pure-identity {A : \Type} {v : F A} : pure id ⊛ v = v
+    => pure-fmap *> fmap-id
+
+  \func pure-fmap' {A B : \Type} {f : A -> B} {x : A} : pure (f x) = f <$> pure x
+    => rewriteI pure-fmap $ rewrite pure-homo idp
+
+  \func mult {A B : \Type} : F A -> F B -> F (\Sigma A B)
     => pure (__, __) ⊛ __ ⊛ __
 }
-
--- \func pure-identity-pointfree {A : \Type} {F : \Type -> \Type} {AppF : Applicative F} : AppF.ap (pure (id {A -> A})) = id {F (A -> A)}
---   => ext (\lam _ => pure-identity)
-
--- \func pure-identity-pointfree' {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} : AppF.ap o AppF.pure {A -> B} = AppF.fmap
---   => ext (\lam x f => {?})
-
--- \func pure-identity-pointfree'' {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} : AppF.ap (pure f) = fmap f
---  => pmap (__ f) pure-identity-pointfree'
-
--- \func pure-homo-pointfree1 {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} : ap (pure f) o pure = AppF.pure o f
---   => ext (\lam _ => pure-homo)
-
--- \func pure-homo-pointfree2 {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {x : A} : (\lam (f : A -> B) => pure f ⊛ pure x) = (\lam f => AppF.pure (f x))
---   => ext (\lam _ => pure-homo)
-
--- \func pure-homo-pointfree-both {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} : (\lam (f : A -> B) (x : A) => pure f ⊛ pure x) = (o AppF.pure)
---   => ext (\lam _ _ => pure-homo)
 
 \func IdApplicative : Applicative id \cowith
   | fmap => IdFunctor.fmap
@@ -41,47 +39,46 @@
   | fmap-comp {_ B C : \Type} {_} {g : B -> C} => IdFunctor.fmap-comp {_} {_} {_} {_} {g}
   | pure => id
   | ap => __ __
-  | pure-identity => idp
+  | pure-fmap => idp
   | pure-comp => idp
   | pure-homo => idp
   | pure-interchange => idp
-
-\class AppTrans (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G}
-  | trans {A : \Type} : F A -> G A
-  | trans-id-pure {A : \Type} {x : A} : trans (pure x) = pure x
-  | trans-comm-ap {A B : \Type} {f : F (A -> B)} {x : F A} : trans (f ⊛ x) = trans f ⊛ trans x
-
--- gut feeling that it's kinda OK
-\func app-trans-natural {F G : \Type -> \Type} {AppF : Applicative F} {AppG : Applicative G} {AT : AppTrans F G} {A B : \Type} {f : A -> B}
-  : AT.trans o AppF.fmap f = AppG.fmap f o AT.trans
-  => ext (\lam x => {?})
-
-\func pure-is-app-trans {F : \Type -> \Type} {AppF : Applicative F} : AppTrans id F {IdApplicative} {AppF} \cowith
-  | trans => AppF.pure
-  | trans-id-pure => idp
-  | trans-comm-ap => rewrite AppF.pure-homo idp
-
-\func fmap-pure-pointfree {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} : AppF.pure o f = fmap f o pure
-  => app-trans-natural {id} {F} {IdApplicative} {AppF} {pure-is-app-trans}
-
-\func fmap-pure {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} {x : A} : AppF.pure (f x) = f <$> pure x
-  => pmap (__ x) fmap-pure-pointfree
+  | sanity-check-ap => idp
+  | sanity-check-lift => unfold Applicative.liftA2Impl idp
 
 \func CompApplicative (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G} : Applicative (F o G) \cowith
   | fmap => fmap {CompFunctor F G {AppF} {AppG}}
   | fmap-id => fmap-id {CompFunctor F G}
   | fmap-comp => fmap-comp {CompFunctor F G}
-  | pure => pure o pure
+  | pure x => pure (pure x)
   | ap => (⊛) <$> __ ⊛ __
-  | pure-identity {A} {v} => run {
-      rewrite (fmap-pure {_} {_} {F} {AppF} {AppG.pure}),
-      rewriteI (AppF.fmap-comp),
-      rewriteI (fmap-pure {_} {_} {F} {AppF} ),
-      rewriteI {4} AppF.pure-identity,
+  | pure-fmap {A} {B} {f} {v} => run {
+      unfold,
+      repeat {2} (rewriteI AppF.pure-fmap),
+      rewrite AppF.pure-homo,
       pmap (__ ⊛ v),
       pmap pure,
-      ext (\lam _ => pure-identity)
+      ext,
+      \lam _ =>
+      rewriteI AppG.pure-fmap idp
   }
-  | pure-comp => {?}
-  | pure-homo => {?}
+  | pure-comp {A B C : \Type} {U : F (G (B -> C))} {V : F (G (A -> B))} {W : F (G A)} => run {
+      unfold,
+  --    rewriteI {3} AppF.pure-comp,
+   --   pmap (__ ⊛ W),
+      {?}
+  }
+  | pure-homo => run {
+      rewriteI AppF.pure-fmap,
+      repeat {2} (rewrite AppF.pure-homo),
+      pmap pure,
+      pure-homo
+  }
   | pure-interchange => {?}
+  | sanity-check-ap => unfold Applicative.liftA2Impl $ ext (\lam w z => rewrite fmap-id idp)
+  | sanity-check-lift => unfold Applicative.liftA2Impl $ rewriteI AppF.fmap-comp idp
+
+\class AppTrans (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G}
+  | trans {A : \Type} : F A -> G A
+  | trans-id-pure {A : \Type} {x : A} : trans (pure x) = pure x
+  | trans-comm-ap {A B : \Type} {f : F (A -> B)} {x : F A} : trans (f ⊛ x) = trans f ⊛ trans x
