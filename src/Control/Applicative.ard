@@ -1,3 +1,5 @@
+\import Algebra.Monoid
+\import Algebra.Pointed
 \import Data.Functor
 \import Function
 \import Function.Meta
@@ -46,6 +48,19 @@
   | sanity-check-ap => idp
   | sanity-check-lift => unfold Applicative.liftA2Impl idp
 
+\func ConstApplicative (C : Monoid) : Applicative (\lam _ => C) \cowith
+  | fmap => fmap {ConstFunctor C}
+  | fmap-id {A} => fmap-id {ConstFunctor C} {A}
+  | fmap-comp {A} => fmap-comp {ConstFunctor C} {A}
+  | pure => \lam _ => ide
+  | ap => *
+  | pure-fmap => unfold ide-left
+  | pure-comp => unfold $ rewrite ide-left $ rewrite *-assoc idp
+  | pure-homo => ide-left
+  | pure-interchange => rewrite ide-left $ rewrite ide-right idp
+  | sanity-check-ap => unfold Applicative.liftA2Impl $ unfold $ ext (\lam _ _ => idp)
+  | sanity-check-lift => unfold Applicative.liftA2Impl idp
+
 \func CompApplicative (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G} : Applicative (F o G) \cowith
   | fmap => fmap {CompFunctor F G {AppF} {AppG}}
   | fmap-id => fmap-id {CompFunctor F G}
@@ -74,8 +89,22 @@
       pmap pure,
       pure-homo
   }
-  | pure-interchange => {?}
-  | sanity-check-ap => unfold Applicative.liftA2Impl $ ext (\lam w z => rewrite fmap-id idp)
+  | pure-interchange {A B : \Type} {u : F (G (A -> B))} {x : A} => run {
+      repeat {2} (rewrite (AppF.pure-fmap' {_} {_} {AppG.pure} {_})),
+    --  rewriteI AppF.fmap-comp,
+    --  rewriteI AppF.pure-interchange,
+    --  repeat {3} (rewriteI AppF.pure-fmap),
+    --  repeat {2} (rewrite AppF.pure-homo),
+      {?}
+  }
+--       rewrite AppF.pure-interchange,
+--       repeat {2} (rewriteI AppF.pure-fmap),
+--       rewriteI AppF.pure-comp,
+--       rewrite AppF.pure-homo,
+--       pmap (__ ⊛ u),
+--       rewrite {2} AppF.pure-homo,
+--       {?}
+  | sanity-check-ap => unfold Applicative.liftA2Impl $ ext (\lam _ _ => rewrite fmap-id idp)
   | sanity-check-lift => unfold Applicative.liftA2Impl $ rewriteI AppF.fmap-comp idp
 
 \class AppTrans (F G : \Type -> \Type) {AppF : Applicative F} {AppG : Applicative G}

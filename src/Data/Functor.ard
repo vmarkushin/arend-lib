@@ -1,7 +1,4 @@
 \import Function
-\import Function.Meta
-\import Logic
-\import Paths
 \import Paths.Meta
 
 \class Functor (\classifying F : \Type -> \Type)
@@ -20,8 +17,12 @@
   | fmap-id => idp
   | fmap-comp => idp
 
+\func ConstFunctor (C : \Type) : Functor (\lam _ => C) \cowith
+  | fmap => \lam _ => id
+  | fmap-id => idp
+  | fmap-comp => idp
+
 \func CompFunctor (F G : \Type -> \Type) {FuncF : Functor F} {FuncG : Functor G} : Functor (F o G) \cowith
   | fmap f => FuncF.fmap (FuncG.fmap f)
   | fmap-id {A} {y} => rewrite (fmap-id-pointfree {_} {FuncG}) FuncF.fmap-id
-  | fmap-comp {_} {_} {_} {f} {g} {y} => rewrite (fmap-comp-pointfree {G} {_} {_} {_} {_} {f} {g}) $ rewriteI FuncF.fmap-comp idp
---  | fmap-comp {_} {_} {_} {_} {_} {y} => rewriteI FuncF.fmap-comp $ pmap (FuncF.fmap __ y) $ ext $ (\lam _ => FuncG.fmap-comp)
+  | fmap-comp {_} {_} {_} {f} {g} {y} => rewrite (fmap-comp-pointfree {G} {_} {_} {_} {_} {f} {g}) (rewriteI FuncF.fmap-comp idp)

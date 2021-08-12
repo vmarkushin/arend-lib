@@ -29,7 +29,7 @@
   | fmap-comp {_} => IdApplicative.fmap-comp
   | pure => IdApplicative.pure
   | ap => IdApplicative.ap
-  | pure-fmap => unfold idp
+  | pure-fmap {_} => IdApplicative.pure-fmap
   | pure-comp {_} => IdApplicative.pure-comp
   | pure-homo {_} => IdApplicative.pure-homo
   | pure-interchange {_} => IdApplicative.pure-interchange
