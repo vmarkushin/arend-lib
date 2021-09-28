@@ -1,4 +1,5 @@
 \import Data.Functor
+\import Data.Maybe
 \import Function
 \import Function.Meta
 \import Meta
@@ -15,6 +16,15 @@
 
 -- \func pure-app {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} {v : F A} : pure f ⊛ v = f <$> v
 --  => {?}
+
+\func mult {F : \Type -> \Type} {AppF : Applicative F} {A B : \Type} : F A -> F B -> F (\Sigma A B)
+  => \lam fa fb => pure (\lam a b => (a, b)) ⊛ fa ⊛ fb
+
+\func mult' {F : \Type -> \Type} {AppF : Applicative F} {A B : \Type} : F (\Sigma A B) -> (\Sigma (F A) (F B))
+  => \lam fab => ((\lam x => x.1) <$> fab, (\lam x => x.2) <$> fab)
+
+\func pure-app {A B : \Type} {F : \Type -> \Type} {AppF : Applicative F} {f : A -> B} {v : F A} : pure f ⊛ v = f <$> v
+  => {?}
 
 \func IdApplicative : Applicative id \cowith
   | fmap => IdFunctor.fmap
@@ -43,3 +53,30 @@
   | trans-id-pure {A : \Set} {x : A} : trans (pure x) = pure x
   | trans-comm-ap {A B : \Set} {f : F (A -> B)} {x : F A}
     : trans (f ⊛ x) = trans f ⊛ trans x
+
+
+\data Expr (ctx : \Set) : \Set
+  | var (global_index : ctx)
+  | num (n : Int)
+  | app (e1 : Expr ctx) (e2 : Expr ctx)
+  | lam (e : Expr (Maybe ctx))
+
+\data Void
+
+-- empty context
+\func zz : Expr Void => num 2
+\func qwe : Expr Void => lam nothing -- identity function, Nothing points to the first lambda
+
+\data MyGlobalDefinitions
+  | FunctionFold
+  | FuncionFmap
+  | DataNat
+  | DataInt
+  | RecordApplicative
+  | RecordTraversable
+
+-- non empty context
+\func dscv : Expr MyGlobalDefinitions => var FunctionFold
+
+-- traverse id
+\func tyuio : Expr MyGlobalDefinitions => app (var FunctionTraverse) (lam Nothing)
