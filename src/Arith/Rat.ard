@@ -11,8 +11,11 @@
 \import Arith.Nat
 \import Data.Bool
 \import Data.Or
+\import Equiv
+\import Function
 \import Function.Meta ($)
 \import Logic
+\import Logic.Meta
 \import Meta
 \import Order.PartialOrder
 \import Order.StrictOrder
@@ -23,11 +26,25 @@
 \open EuclideanSemiringData
 \open Monoid(LDiv)
 
+\data And (A B : \Prop) | and A B
+
 \record Rat (nom : Int) (denom : Nat) (denom/=0 : Not (denom = 0)) (reduced : gcd (iabs nom) denom = 1)
   \where {
     \func AltRat : CRing => LocRing subset
       \where \func subset : MSubset => localization-isOrderedField.positiveSubset IntRing
   }
+
+\class SubsetRat
+  | \fix 8 contains : Rat -> \Prop
+
+\record DedekindCut
+  (L U : SubsetRat)
+  (inhabitedL : \Sigma (q : Rat) (L.contains q))
+  (inhabitedU : \Sigma (r : Rat) (U.contains r))
+  (roundedL : ∃ (q : Rat) (L.contains q) = ∃ (r : Rat) (inhabitedL.1 < {RatField} r) (L.contains r))
+  (roundedR : ∃ (r : Rat) (U.contains r) = ∃ (q : Rat) (q < {RatField} inhabitedU.1) (U.contains q))
+  (disjoint : Not (∃ (L.contains inhabitedL.1) (U.contains inhabitedL.1)))
+  (located  : \Pi (p : inhabitedL.1 < {RatField} inhabitedU.1) -> (L.contains inhabitedL.1 || U.contains inhabitedU.1))
 
 \open Rat(AltRat)
 

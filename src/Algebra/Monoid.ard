@@ -2,6 +2,7 @@
 \import Algebra.Pointed
 \import Arith.Nat
 \import Data.Array
+\import Function
 \import HLevel
 \import Meta
 \import Paths
@@ -309,3 +310,10 @@
   \lemma divInv {x y : E} (xy|x : Monoid.LDiv (x * y) x) : Monoid.Inv y
     => CMonoid.divInv (cancel-left x) xy|x
 }
+
+\instance EndoMonoid (A : \Set) : Monoid (A -> A)
+  | ide => id
+  | * => o
+  | ide-left => idp
+  | ide-right => idp
+  | *-assoc => idp

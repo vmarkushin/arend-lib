@@ -1,0 +1,40 @@
+\import Control.Applicative
+\import Data.Functor
+\import Function
+\import Function.Meta
+\import Meta
+\import Paths.Meta
+
+\class Monad \extends Applicative {
+  | join {A : \Type} : F (F A) -> F A
+  | bind \alias \infixl 3 >>= {A B : \Type} : F A -> (A -> F B) -> F B
+
+  | join-right-id {A : \Type} {mx : F A} : join (pure mx) = mx
+  | join-left-id {A : \Type} {mmx : F (F A)} : pure (join mmx) = mmx
+  | join-assoc {A : \Type} {mmmx : F (F (F A))} : join (join mmmx) = join (fmap join mmmx)
+
+  | sanity-check-bind {A : \Type} {mmx : F (F A)} : join mmx = mmx >>= id
+
+  \default join \as joinImpl {A : \Type} (mmx : F (F A)) : F A => mmx >>= id
+
+  \default bind \as bindImpl {A B : \Type} (mx : F A) (f : A -> F B) : F B => join (fmap f mx)
+
+  \func \infixl 1 >> {A B : \Type} : F A -> F B -> F B
+    => \lam ma k => ma >>= (\lam _ => k)
+}
+
+\func IdMonad : Monad id \cowith
+  | fmap => IdApplicative.fmap
+  | fmap-id => IdApplicative.fmap-id
+  | fmap-comp {_} => IdApplicative.fmap-comp
+  | pure => IdApplicative.pure
+  | ap => IdApplicative.ap
+  | pure-identity => IdApplicative.pure-identity
+  | pure-comp {_} => IdApplicative.pure-comp
+  | pure-homo {_} => IdApplicative.pure-homo
+  | pure-interchange {_} => IdApplicative.pure-interchange
+  | join => id
+  | join-right-id => idp
+  | join-left-id => idp
+  | join-assoc => idp
+  | sanity-check-bind => idp

@@ -116,6 +116,9 @@ public class StdExtension implements ArendExtension {
         "`fails meta args` succeeds if and only if `meta args` fails\n\n" +
         "`fails {T} meta args` succeeds if and only if `meta args : T` fails",
         Precedence.DEFAULT, new FailsMeta(this));
+    contributor.declare(meta, new LongName("fail"),
+            "`fail` is the always-failing meta: it does not solve any goal",
+            Precedence.DEFAULT, new FailMeta(this));
     contributor.declare(meta, new LongName("using"),
         "`using (e_1, ... e_n) e` adds `e_1`, ... `e_n` to the context before checking `e`",
         Precedence.DEFAULT, new UsingMeta(true));
@@ -220,6 +223,9 @@ public class StdExtension implements ArendExtension {
         "`repeat {n} f x` returns `f^n(x)\n\n`" +
         "`repeat f x` repeats `f` until it fails and returns `x` in this case",
         Precedence.DEFAULT, new RepeatMeta(this));
+    contributor.declare(function, new LongName("intros"),
+            "`intros` introduces lambda arguments into context",
+            Precedence.DEFAULT, new IntrosMeta(this));
 
     ModulePath algebra = ModulePath.fromString("Algebra.Meta");
     contributor.declare(algebra, new LongName("equation"),

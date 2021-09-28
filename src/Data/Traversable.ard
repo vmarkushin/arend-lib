@@ -1,0 +1,35 @@
+\import Algebra.Monoid
+\import Algebra.Pointed (ide)
+\import Control.Monad
+\import Data.Functor
+\import Data.Bool
+\import Data.Foldable
+\import Function
+\import Function.Meta
+\import Meta
+\import Set.Category
+\import Control.Applicative
+
+\class Traversable (T : \Set -> \Set) {FuncI : Functor T} {FoldI : Foldable T}  {
+  | traverse {A B : \Set} {F : \Set -> \Set} {AppF : Applicative F} : (A -> F B) -> T A -> F (T B)
+  | traverse-natural
+      {A B : \Set} {F G : \Set -> \Set} {AppF : Applicative F} {AppG : Applicative G}
+      {AT : AppTrans F G {AppF} {AppG}} (f : A -> F B)
+      : AT.trans {_} o traverse {\this} {_} {_} {_} {AppF} f = traverse {\this} {_} {_} {_} {AppG} (AT.trans {_} o f)
+  | traverse-id {A : \Set} : traverse {\this} {A} {_} {_} {IdApplicative} id = id
+  | traverse-comp
+      {A B C : \Set} {F G : \Set -> \Set}
+      {AppF : Applicative F} {AppG : Applicative G}
+      (f : A -> F B) (g : B -> G C)
+      : traverse {\this} {A} {C} {F o G} {CompApplicative F G {AppF} {AppG}} (fmap {AppF} g o f)
+      = fmap {AppF} (traverse {\this} {B} {C} {G} {AppG} g) o traverse {\this} {A} {B} {F} {AppF} f
+
+  \func sequenceA {A : \Set} {F : \Set -> \Set} {AppF : Applicative F} : T (F A) -> F (T A)
+    => traverse {_} {_} {_} {_} {AppF} id
+
+  \func mapM {A B : \Set} {M : \Set -> \Set} {MonM : Monad M} :  (A -> M B) -> T A -> M (T B)
+    => traverse {_} {_} {_} {_} {MonM}
+
+  \func sequence {A B : \Set} {M : \Set -> \Set} {MonM : Monad M} : T (M A) -> M (T A)
+    => sequenceA
+}
