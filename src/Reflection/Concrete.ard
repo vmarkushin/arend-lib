@@ -25,10 +25,12 @@
 
 -- empty context
 \func zz : ExprC Void => num 2
-\func qwe : ExprC Void => lam nothing -- identity function, Nothing points to the first lambda
--- \lam x \lam y => x
+\func qwe : ExprC Void => lam (var nothing) -- identity function, Nothing points to the first lambda
 
-\func qwe' : ExprC Void => lam (lam {?})
+-- \lam x \lam y => x
+\func qwe' : ExprC Void => lam (lam (var (just nothing)))
+-- \lam x \lam y => y x
+\func qwe'' : ExprC Void => lam (lam (app (var nothing) (var (just nothing))))
 
 \data MyGlobalDefinitions
   | FunctionFold
@@ -43,12 +45,6 @@
 
 -- traverse id
 \func tyuio : Expr MyGlobalDefinitions => app (var FunctionTraverse) (lam Nothing)
-
-\record ScopeF (B : \Set) (F : \Set -> \Set) (A : \Set)
-  | unscopeF : F (Var B (F A))
-
-\record Scope (B : \Set) (F : \Set -> \Set) (FA : \Set)
-  | unscope : F (Var B (FA))
 
 \data Unit : \Set
   | unit
